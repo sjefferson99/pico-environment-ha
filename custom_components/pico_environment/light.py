@@ -23,7 +23,6 @@ PLATFORM_SCHEMA = PLATFORM_SCHEMA.extend(
     }
 )
 
-
 def setup_platform(
     hass: HomeAssistant,
     config: ConfigType,
@@ -35,7 +34,6 @@ def setup_platform(
     light = {"name": config[CONF_NAME], "ip": config[CONF_IP_ADDRESS]}
 
     add_entities([PicoEnvironment(light)])
-
 
 class PicoEnvironment(LightEntity):
     """Representation of Pico Environment Control instance"""
@@ -73,7 +71,9 @@ class PicoEnvironment(LightEntity):
 
     async def async_turn_on(self, **kwargs) -> None:
         if ATTR_BRIGHTNESS in kwargs:
-            pass  # TODO add brightness to API wrapper
+            brightness_value = kwargs[ATTR_BRIGHTNESS]
+            brightness_pc = int(brightness_value / 2.55)
+            await self._light.async_set_brightness_pc(brightness_pc)
 
         return await self._light.async_change_light_state("on")
 
@@ -82,4 +82,4 @@ class PicoEnvironment(LightEntity):
 
     async def async_update(self) -> None:
         self._state = await self._light.async_get_light_state()
-        self._brightness = 255  # TODO add brightness to api library
+        self._brightness = int(int(await self._light.async_get_brightness_pc()) * 2.55)
