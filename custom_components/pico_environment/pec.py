@@ -1,14 +1,32 @@
 from aiohttp import ClientSession
 from time import sleep
 
-
 class PEC:
     """Instance of Pico Environment Control setup"""
 
     def __init__(self, host) -> None:
         self.host = host
         self.mac_address = "28:cd:c1:0c:eb:59"
+        self.base_url = "http://" + self.host + "/api"
 
+    async def async_get_api_with_response(self, url):
+        async with ClientSession() as session:
+            async with session.get(url) as response:
+                if response.status == 200:
+                    text = await response.text()
+                    return text
+                else:
+                    return -1
+                
+    async def async_put_api_with_response(self, url, data):
+        async with ClientSession() as session:
+            async with session.put(url, json=data) as response:
+                if response.status == 200:
+                    text = await response.text()
+                    return text
+                else:
+                    return -1
+    
     async def async_change_light_state(self, state: str) -> int:
         url = "http://" + self.host + "/api/light/state"
         data = {"state": state}
@@ -35,10 +53,20 @@ class PEC:
                         f"Failed to get the light state. Status code: {response.status_code}"
                     )
                     return ""
+    
+    async def async_get_brightness_pc(self) -> int:
+        url = self.base_url + "/light/brightness"
+        brightness = await self.async_get_api_with_response(url)
+        return brightness
+
+    async def async_set_brightness_pc(self, brightness: int) -> int:
+        url = self.base_url + "/light/brightness"
+        data = {"value": brightness}
+        result = await self.async_put_api_with_response(url, data)
+        return result
 
     def get_mac_address(self) -> str:
         return self.mac_address
-
 
 # Example usage
 # if __name__ == "__main__":

@@ -5,7 +5,9 @@ This repository contains the files needed to add to a custom_component directory
 It is currently in a beta, probably alpha how does this all work PoC state and is likely to be buggy, insecure, wrong and generally not great, but should work to some degree if carefully reviewed before installing in any production servers.
 
 ## Features
+- Polling status of light and brightness
 - On/Off control of the light
+- Brightness control of the light
 
 ## Installation
 As yet I have no desire to wrangle HA PRs or even investigate understanding HACS, so this is a straightforward copy the pico_environment folder to your custom_components folder and use the configuration.yaml in the repo root as a guide to manually configuring your HA to use the custom module.
