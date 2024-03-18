@@ -1,4 +1,5 @@
 from aiohttp import ClientSession
+import asyncio
 from time import sleep
 
 class PEC:
@@ -6,8 +7,8 @@ class PEC:
 
     def __init__(self, host) -> None:
         self.host = host
-        self.mac_address = "28:cd:c1:0c:eb:59"
         self.base_url = "http://" + self.host + "/api"
+        self.mac_address = asyncio.run(self.async_populate_mac_address())
 
     async def async_get_api_with_response(self, url):
         async with ClientSession() as session:
@@ -65,6 +66,11 @@ class PEC:
         result = await self.async_put_api_with_response(url, data)
         return result
 
+    async def async_populate_mac_address(self) -> str:
+        url = self.base_url + "/wlan/mac"
+        mac = await self.async_get_api_with_response(url)
+        return mac
+    
     def get_mac_address(self) -> str:
         return self.mac_address
 
