@@ -1,5 +1,5 @@
 """Platform for sensor integration."""
-from homeassistant.const import _DEPRECATED_DEVICE_CLASS_HUMIDITY, PERCENTAGE
+from homeassistant.components.sensor import SensorDeviceClass
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity import Entity
 
@@ -20,7 +20,7 @@ async def async_setup_entry(hass: HomeAssistant, config_entry, async_add_entitie
 
 
 class EnvironmentSensor(Entity):
-    """Environment sensor device class"""
+    """Environment sensor device class."""
 
     should_poll = True
 
@@ -72,8 +72,7 @@ class SensorBase(Entity):
 class HumiditySensor(SensorBase):
     """Specific humidity sensor class."""
 
-    device_class = _DEPRECATED_DEVICE_CLASS_HUMIDITY
-    _attr_unit_of_measurement = "%"
+    device_class = SensorDeviceClass.HUMIDITY
 
     def __init__(self, environment_sensor: Environment_Sensor) -> None:
         """Initialize the sensor."""
