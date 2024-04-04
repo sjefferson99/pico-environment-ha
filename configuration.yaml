@@ -1,4 +1,0 @@
-light:
-  - platform: pico_environment
-    name: "Shed PEC"
-    ip_address: 192.168.13.121
