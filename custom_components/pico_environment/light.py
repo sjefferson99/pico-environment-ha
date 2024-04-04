@@ -1,18 +1,21 @@
-import logging
-from .pec import PEC
-import voluptuous as vol
+import logging  # noqa: D100
 from pprint import pformat
-import homeassistant.helpers.config_validation as cv
+
+import voluptuous as vol
+
 from homeassistant.components.light import (
-    SUPPORT_BRIGHTNESS,
     ATTR_BRIGHTNESS,
     PLATFORM_SCHEMA,
+    SUPPORT_BRIGHTNESS,
     LightEntity,
 )
-from homeassistant.const import CONF_NAME, CONF_IP_ADDRESS
+from homeassistant.const import CONF_IP_ADDRESS, CONF_NAME
 from homeassistant.core import HomeAssistant
+import homeassistant.helpers.config_validation as cv
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from homeassistant.helpers.typing import ConfigType, DiscoveryInfoType
+
+from .pec import PEC
 
 _LOGGER = logging.getLogger("pec")
 
@@ -22,6 +25,7 @@ PLATFORM_SCHEMA = PLATFORM_SCHEMA.extend(
         vol.Required(CONF_IP_ADDRESS): cv.string,
     }
 )
+
 
 def setup_platform(
     hass: HomeAssistant,
@@ -35,8 +39,9 @@ def setup_platform(
 
     add_entities([PicoEnvironment(light)])
 
+
 class PicoEnvironment(LightEntity):
-    """Representation of Pico Environment Control instance"""
+    """Representation of Pico Environment Control instance."""
 
     def __init__(self, light) -> None:
         _LOGGER.info(pformat(light))
@@ -48,12 +53,12 @@ class PicoEnvironment(LightEntity):
 
     @property
     def name(self) -> str:
-        """Return the display name of this light"""
+        """Return the display name of this light."""
         return self._name
 
     @property
     def brightness(self):
-        """Return the brightness of this light"""
+        """Return the brightness of this light."""
         return self._brightness
 
     @property
