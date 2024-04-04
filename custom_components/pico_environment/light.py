@@ -1,55 +1,57 @@
-import logging  # noqa: D100
-from pprint import pformat
-
-import voluptuous as vol
-
-from homeassistant.components.light import (
-    ATTR_BRIGHTNESS,
-    PLATFORM_SCHEMA,
-    SUPPORT_BRIGHTNESS,
-    LightEntity,
-)
-from homeassistant.const import CONF_IP_ADDRESS, CONF_NAME
+from homeassistant.components.light import ATTR_BRIGHTNESS, ColorMode, LightEntity
 from homeassistant.core import HomeAssistant
-import homeassistant.helpers.config_validation as cv
-from homeassistant.helpers.entity_platform import AddEntitiesCallback
-from homeassistant.helpers.typing import ConfigType, DiscoveryInfoType
+from homeassistant.helpers.entity import Entity
 
-from .pec import PEC
-
-_LOGGER = logging.getLogger("pec")
-
-PLATFORM_SCHEMA = PLATFORM_SCHEMA.extend(
-    {
-        vol.Optional(CONF_NAME): cv.string,
-        vol.Required(CONF_IP_ADDRESS): cv.string,
-    }
-)
+from .const import DOMAIN
+from .pec import PEC, Light
 
 
-def setup_platform(
-    hass: HomeAssistant,
-    config: ConfigType,
-    add_entities: AddEntitiesCallback,
-    discovery_info: DiscoveryInfoType | None = None,
-) -> None:
-    _LOGGER.info(pformat(config))
+async def async_setup_entry(hass: HomeAssistant, config_entry, async_add_entities):
+    """Add lights for passed config_entry in HA."""
+    pec: PEC = hass.data[DOMAIN][config_entry.entry_id]
 
-    light = {"name": config[CONF_NAME], "ip": config[CONF_IP_ADDRESS]}
-
-    add_entities([PicoEnvironment(light)])
+    new_entities = []
+    for light in pec.lights:
+        new_entities.append(PECLight(light))
+    if new_entities:
+        async_add_entities(new_entities, update_before_add=True)
 
 
-class PicoEnvironment(LightEntity):
+class PECLight(LightEntity):
     """Representation of Pico Environment Control instance."""
 
-    def __init__(self, light) -> None:
-        _LOGGER.info(pformat(light))
-        self._light = PEC(light["ip"])
-        self._name = light["name"]
+    def __init__(self, light: Light) -> None:
+        self._light = light
+        self._id = light.light_id
+        self._name = light.name
         self._state = None
         self._brightness = None
-        self._mac_address = self._light.get_mac_address()
+        self._attr_unique_id = f"{self._id}_light"
+        self._attr_name = f"{self._name} light"
+        self._sensors_online = True  # TODO make a coroutine to update this accurately
+
+    @property
+    def device_info(self):
+        """Information about this entity/device."""
+        return {
+            "identifiers": {(DOMAIN, self._id)},
+            "name": f"{self._name} light",
+        }
+
+    @property
+    def available(self) -> bool:
+        """Return True if roller and hub is available."""
+        return self._sensors_online
+
+    @property
+    def supported_color_modes(self) -> set:
+        """Return the set of supported color modes."""
+        return {ColorMode.BRIGHTNESS}
+
+    @property
+    def color_mode(self) -> str:
+        """Return the current color mode of the light."""
+        return ColorMode.BRIGHTNESS
 
     @property
     def name(self) -> str:
@@ -60,15 +62,6 @@ class PicoEnvironment(LightEntity):
     def brightness(self):
         """Return the brightness of this light."""
         return self._brightness
-
-    @property
-    def supported_features(self):
-        return SUPPORT_BRIGHTNESS
-
-    @property
-    def unique_id(self) -> str:
-        """Return a unique ID."""
-        return self._mac_address
 
     @property
     def is_on(self) -> bool | None:

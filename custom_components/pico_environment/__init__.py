@@ -6,7 +6,7 @@ from homeassistant.core import HomeAssistant
 from . import pec  # TODO I think this should be from .pec import PEC and change line 14
 from .const import DOMAIN
 
-PLATFORMS: list[str] = ["sensor"]
+PLATFORMS: list[str] = ["light", "sensor"]
 
 
 async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:

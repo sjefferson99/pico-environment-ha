@@ -80,7 +80,7 @@ class Outdoor_Humidity:
 
     @property
     def outdoor_humidity_id(self) -> str:
-        """Return ID for outfoor humidity."""
+        """Return ID for outdoor humidity."""
         return self._id
 
 
@@ -91,35 +91,33 @@ class Light:
         self._id = id
         self._pec = controller
         self.name = name
+        self._base_url = self._pec._base_url
+
+    @property
+    def light_id(self) -> str:
+        """Return ID for light."""
+        return self._id
 
     async def async_change_light_state(self, state: str) -> int:
-        url = "http://" + self._host + "/api/light/state"
+        url = self._base_url + "/light/state"
         data = {"state": state}
-        async with ClientSession() as session, session.put(url, json=data) as response:
-            if response.status == 200:
-                return 0
-            return -1
+        result = await self._pec._async_put_api_with_response(url, data)
+        return result
 
     async def async_get_light_state(self) -> bool:
-        url = "http://" + self._host + "/api/light/state"
-        async with ClientSession() as session, session.get(url) as response:
-            if response.status == 200:
-                tf = await response.text()
-                if tf == "true":
-                    state = True
-                else:
-                    state = False
-                return state
-            print(f"Failed to get the light state. Status code: {response.status_code}")
-            return ""
+        url = self._base_url + "/light/state"
+        tf = await self._pec.async_get_api_with_response(url)
+        if tf == "true":
+            return True
+        return False
 
     async def async_get_brightness_pc(self) -> int:
         url = self._base_url + "/light/brightness"
-        brightness = await self.async_get_api_with_response(url)
+        brightness = await self._pec.async_get_api_with_response(url)
         return brightness
 
     async def async_set_brightness_pc(self, brightness: int) -> int:
         url = self._base_url + "/light/brightness"
         data = {"value": brightness}
-        result = await self._async_put_api_with_response(url, data)
+        result = await self._pec._async_put_api_with_response(url, data)
         return result
