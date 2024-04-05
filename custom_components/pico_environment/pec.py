@@ -132,3 +132,10 @@ class Light:
         data = {"value": brightness}
         result = await self._pec.async_put_api_with_response(url, data)
         return result
+
+    async def async_test_light_online(self) -> bool:
+        """Check the light brightness APi doesn't return an error."""
+        response = await self.async_get_brightness_pc()
+        if response == -1:
+            return False
+        return True

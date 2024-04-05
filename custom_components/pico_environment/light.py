@@ -32,7 +32,7 @@ class PECLight(LightEntity):
         self._brightness = None
         self._attr_unique_id = f"{self._id}"
         self._attr_name = f"{self._name}"
-        self._sensors_online = True  # TODO make a coroutine to update this accurately
+        self._online = False
 
     @property
     def device_info(self):
@@ -45,7 +45,7 @@ class PECLight(LightEntity):
     @property
     def available(self) -> bool:
         """Return True if roller and hub is available."""
-        return self._sensors_online
+        return self._online
 
     @property
     def supported_color_modes(self) -> set:
@@ -89,3 +89,4 @@ class PECLight(LightEntity):
         """Make API calls to the device to cache values for HA UI polls."""
         self._state = await self._light.async_get_light_state()
         self._brightness = int(int(await self._light.async_get_brightness_pc()) * 2.55)
+        self._online = await self._light.async_test_light_online()
