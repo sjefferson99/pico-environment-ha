@@ -1,4 +1,4 @@
-import logging
+import logging  # noqa: D100
 from typing import Any
 
 import voluptuous as vol

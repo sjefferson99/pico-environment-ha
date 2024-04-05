@@ -1,4 +1,8 @@
-from homeassistant.components.light import ATTR_BRIGHTNESS, ColorMode, LightEntity
+from homeassistant.components.light import (  # noqa: D100
+    ATTR_BRIGHTNESS,
+    ColorMode,
+    LightEntity,
+)
 from homeassistant.core import HomeAssistant
 
 from .const import DOMAIN
@@ -11,7 +15,7 @@ async def async_setup_entry(hass: HomeAssistant, config_entry, async_add_entitie
 
     new_entities = []
     for light in pec.lights:
-        new_entities.append(PECLight(light))
+        new_entities.append(PECLight(light))  # noqa: PERF401
     if new_entities:
         async_add_entities(new_entities, update_before_add=True)
 
@@ -20,6 +24,7 @@ class PECLight(LightEntity):
     """Representation of Pico Environment Control instance."""
 
     def __init__(self, light: Light) -> None:
+        """Init a PECLight."""
         self._light = light
         self._id = light.light_id
         self._name = light.name
@@ -64,9 +69,11 @@ class PECLight(LightEntity):
 
     @property
     def is_on(self) -> bool | None:
+        """Returns boolean for light state."""
         return self._state
 
     async def async_turn_on(self, **kwargs) -> None:
+        """Turn the light on."""
         if ATTR_BRIGHTNESS in kwargs:
             brightness_value = kwargs[ATTR_BRIGHTNESS]
             brightness_pc = int(brightness_value / 2.55)
@@ -75,8 +82,10 @@ class PECLight(LightEntity):
         return await self._light.async_change_light_state("on")
 
     async def async_turn_off(self, **kwargs) -> None:
+        """Turn the light off."""
         return await self._light.async_change_light_state("off")
 
     async def async_update(self) -> None:
+        """Make API calls to the device to cache values for HA UI polls."""
         self._state = await self._light.async_get_light_state()
         self._brightness = int(int(await self._light.async_get_brightness_pc()) * 2.55)

@@ -1,4 +1,4 @@
-"""Pico Environment Control"""
+"""Pico Environment Control."""
 
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant

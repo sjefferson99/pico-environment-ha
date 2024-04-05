@@ -25,6 +25,7 @@ class EnvironmentSensor(Entity):
     should_poll = True
 
     def __init__(self, environment_sensor: Environment_Sensor) -> None:
+        """Init an environment sensor module (device) containing the various sensor entities."""
         self._environment_sensor = environment_sensor
         self._attr_unique_id = f"{self._environment_sensor.environment_sensor_id}"
         self._attr_name = f"{self._environment_sensor.name}"
@@ -87,4 +88,5 @@ class HumiditySensor(SensorBase):
         return self._humidity
 
     async def async_update(self) -> None:
+        """Make API calls to the device to cache values for HA UI polls."""
         self._humidity = await self._environment_sensor.async_update_humidity()
