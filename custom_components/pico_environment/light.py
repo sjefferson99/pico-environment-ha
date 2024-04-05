@@ -1,85 +1,92 @@
-import logging
-from .pec import PEC
-import voluptuous as vol
-from pprint import pformat
-import homeassistant.helpers.config_validation as cv
-from homeassistant.components.light import (
-    SUPPORT_BRIGHTNESS,
+from homeassistant.components.light import (  # noqa: D100
     ATTR_BRIGHTNESS,
-    PLATFORM_SCHEMA,
+    ColorMode,
     LightEntity,
 )
-from homeassistant.const import CONF_NAME, CONF_IP_ADDRESS
 from homeassistant.core import HomeAssistant
-from homeassistant.helpers.entity_platform import AddEntitiesCallback
-from homeassistant.helpers.typing import ConfigType, DiscoveryInfoType
 
-_LOGGER = logging.getLogger("pec")
-
-PLATFORM_SCHEMA = PLATFORM_SCHEMA.extend(
-    {
-        vol.Optional(CONF_NAME): cv.string,
-        vol.Required(CONF_IP_ADDRESS): cv.string,
-    }
-)
+from .const import DOMAIN
+from .pec import PEC, Light
 
 
-def setup_platform(
-    hass: HomeAssistant,
-    config: ConfigType,
-    add_entities: AddEntitiesCallback,
-    discovery_info: DiscoveryInfoType | None = None,
-) -> None:
-    _LOGGER.info(pformat(config))
+async def async_setup_entry(hass: HomeAssistant, config_entry, async_add_entities):
+    """Add lights for passed config_entry in HA."""
+    pec: PEC = hass.data[DOMAIN][config_entry.entry_id]
 
-    light = {"name": config[CONF_NAME], "ip": config[CONF_IP_ADDRESS]}
-
-    add_entities([PicoEnvironment(light)])
+    new_entities = []
+    for light in pec.lights:
+        new_entities.append(PECLight(light))  # noqa: PERF401
+    if new_entities:
+        async_add_entities(new_entities, update_before_add=True)
 
 
-class PicoEnvironment(LightEntity):
-    """Representation of Pico Environment Control instance"""
+class PECLight(LightEntity):
+    """Representation of Pico Environment Control instance."""
 
-    def __init__(self, light) -> None:
-        _LOGGER.info(pformat(light))
-        self._light = PEC(light["ip"])
-        self._name = light["name"]
+    def __init__(self, light: Light) -> None:
+        """Init a PECLight."""
+        self._light = light
+        self._id = light.light_id
+        self._name = light.name
         self._state = None
         self._brightness = None
-        self._mac_address = self._light.get_mac_address()
+        self._attr_unique_id = f"{self._id}"
+        self._attr_name = f"{self._name}"
+        self._online = False
+
+    @property
+    def device_info(self):
+        """Information about this entity/device."""
+        return {
+            "identifiers": {(DOMAIN, self._id)},
+            "name": f"{self._name}",
+        }
+
+    @property
+    def available(self) -> bool:
+        """Return True if roller and hub is available."""
+        return self._online
+
+    @property
+    def supported_color_modes(self) -> set:
+        """Return the set of supported color modes."""
+        return {ColorMode.BRIGHTNESS}
+
+    @property
+    def color_mode(self) -> str:
+        """Return the current color mode of the light."""
+        return ColorMode.BRIGHTNESS
 
     @property
     def name(self) -> str:
-        """Return the display name of this light"""
+        """Return the display name of this light."""
         return self._name
 
     @property
     def brightness(self):
-        """Return the brightness of this light"""
+        """Return the brightness of this light."""
         return self._brightness
 
     @property
-    def supported_features(self):
-        return SUPPORT_BRIGHTNESS
-
-    @property
-    def unique_id(self) -> str:
-        """Return a unique ID."""
-        return self._mac_address
-
-    @property
     def is_on(self) -> bool | None:
+        """Returns boolean for light state."""
         return self._state
 
     async def async_turn_on(self, **kwargs) -> None:
+        """Turn the light on."""
         if ATTR_BRIGHTNESS in kwargs:
-            pass  # TODO add brightness to API wrapper
+            brightness_value = kwargs[ATTR_BRIGHTNESS]
+            brightness_pc = int(brightness_value / 2.55)
+            await self._light.async_set_brightness_pc(brightness_pc)
 
         return await self._light.async_change_light_state("on")
 
     async def async_turn_off(self, **kwargs) -> None:
+        """Turn the light off."""
         return await self._light.async_change_light_state("off")
 
     async def async_update(self) -> None:
+        """Make API calls to the device to cache values for HA UI polls."""
         self._state = await self._light.async_get_light_state()
-        self._brightness = 255  # TODO add brightness to api library
+        self._brightness = int(int(await self._light.async_get_brightness_pc()) * 2.55)
+        self._online = await self._light.async_test_light_online()

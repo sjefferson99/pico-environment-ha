@@ -1,12 +1,13 @@
 {
     "codeowners": ["@sjefferson99"],
-    "config_flow": false,
+    "config_flow": true,
     "dependencies": [],
     "documentation": "https://github.com/sjefferson99/pico-environment-ha.git",
+    "integration_type": "hub",
     "domain": "pico_environment",
     "iot_class": "local_polling",
+    "issue_tracker": "https://github.com/sjefferson99/pico-environment-ha.git",
     "name": "Pico Environment",
-    "requirements": ["aiohttp"],
+    "requirements": [],
     "version": "0.1.0"
-  }
-  
+}

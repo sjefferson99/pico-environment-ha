@@ -1,0 +1,16 @@
+{
+    "config": {
+        "step": {
+            "user": {
+                "data": {
+                    "host": "Enter the hostname or IP address"
+                }
+            }
+        },
+        "error": {
+            "cannot_connect": "Failed to connect, please check the hostname or IP address.",
+            "invalid_host": "The provided hostname or IP address is invalid."
+        },
+        "title": "Pico Environment Control"
+    }
+}
