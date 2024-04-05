@@ -1,6 +1,5 @@
 from homeassistant.components.light import ATTR_BRIGHTNESS, ColorMode, LightEntity
 from homeassistant.core import HomeAssistant
-from homeassistant.helpers.entity import Entity
 
 from .const import DOMAIN
 from .pec import PEC, Light
@@ -26,8 +25,8 @@ class PECLight(LightEntity):
         self._name = light.name
         self._state = None
         self._brightness = None
-        self._attr_unique_id = f"{self._id}_light"
-        self._attr_name = f"{self._name} light"
+        self._attr_unique_id = f"{self._id}"
+        self._attr_name = f"{self._name}"
         self._sensors_online = True  # TODO make a coroutine to update this accurately
 
     @property
@@ -35,7 +34,7 @@ class PECLight(LightEntity):
         """Information about this entity/device."""
         return {
             "identifiers": {(DOMAIN, self._id)},
-            "name": f"{self._name} light",
+            "name": f"{self._name}",
         }
 
     @property

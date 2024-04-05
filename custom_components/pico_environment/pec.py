@@ -15,12 +15,12 @@ class PEC:
         self._id = host.lower()
         self._base_url = "http://" + self._host + "/api"
         self._mac_address = None
-        self.lights = [Light(f"{self._id}_1", f"{self._name} 1", self)]
+        self.lights = [Light(f"{self._id}_light_1", f"{self._name} Light 1", self)]
         self.environment_sensors = [
-            Environment_Sensor(f"{self._id}_1", f"{self._name} 1", self)
+            Environment_Sensor(f"{self._id}sensor_1", f"{self._name} Sensor 1", self)
         ]
         self.outdoor_humidity = Outdoor_Humidity(
-            f"{self._id}_1", f"{self._name} 1", self
+            f"{self._id}outdoor_h_1", f"{self._name} Outdoor Humidity 1", self
         )
 
     async def async_get_api_with_response(self, url):

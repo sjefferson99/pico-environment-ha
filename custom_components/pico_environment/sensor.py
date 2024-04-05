@@ -26,10 +26,8 @@ class EnvironmentSensor(Entity):
 
     def __init__(self, environment_sensor: Environment_Sensor) -> None:
         self._environment_sensor = environment_sensor
-        self._attr_unique_id = (
-            f"{self._environment_sensor.environment_sensor_id}_sensor"
-        )
-        self._attr_name = f"{self._environment_sensor.name} sensor"
+        self._attr_unique_id = f"{self._environment_sensor.environment_sensor_id}"
+        self._attr_name = f"{self._environment_sensor.name}"
         self._sensors_online = True  # TODO make a coroutine to update this accurately
 
     @property
@@ -37,7 +35,7 @@ class EnvironmentSensor(Entity):
         """Information about this entity/device."""
         return {
             "identifiers": {(DOMAIN, self._environment_sensor.environment_sensor_id)},
-            "name": f"{self._environment_sensor.name} sensor",
+            "name": f"{self._environment_sensor.name}",
         }
 
     @property
