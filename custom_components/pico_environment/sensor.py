@@ -29,7 +29,6 @@ class EnvironmentSensor(Entity):
         self._environment_sensor = environment_sensor
         self._attr_unique_id = f"{self._environment_sensor.environment_sensor_id}"
         self._attr_name = f"{self._environment_sensor.name}"
-        self._sensors_online = True  # TODO make a coroutine to update this accurately
 
     @property
     def device_info(self):
@@ -38,11 +37,6 @@ class EnvironmentSensor(Entity):
             "identifiers": {(DOMAIN, self._environment_sensor.environment_sensor_id)},
             "name": f"{self._environment_sensor.name}",
         }
-
-    @property
-    def available(self) -> bool:
-        """Return True if roller and hub is available."""
-        return self._sensors_online
 
 
 class SensorBase(Entity):
@@ -53,7 +47,7 @@ class SensorBase(Entity):
     def __init__(self, environment_sensor: Environment_Sensor) -> None:
         """Initialize the sensor."""
         self._environment_sensor = environment_sensor
-        self._sensors_online = True  # TODO make a coroutine to update this accurately
+        self._online = True
 
     @property
     def device_info(self):
@@ -65,7 +59,7 @@ class SensorBase(Entity):
     @property
     def available(self) -> bool:
         """Return True if roller and hub is available."""
-        return self._sensors_online
+        return self._online
 
 
 class HumiditySensor(SensorBase):
@@ -90,3 +84,4 @@ class HumiditySensor(SensorBase):
     async def async_update(self) -> None:
         """Make API calls to the device to cache values for HA UI polls."""
         self._humidity = await self._environment_sensor.async_update_humidity()
+        self._online = await self._environment_sensor.async_test_sensors_online()

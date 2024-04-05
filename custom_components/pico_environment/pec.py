@@ -74,6 +74,13 @@ class Environment_Sensor:
         humidity = await self._pec.async_get_api_with_response(url)
         return humidity
 
+    async def async_test_sensors_online(self) -> bool:
+        """Check the light brightness APi doesn't return an error."""
+        response = await self.async_update_humidity()
+        if response == -1:
+            return False
+        return True
+
 
 class Outdoor_Humidity:
     """PEC outdoor humidity sensor class for returning local outdoor humidity conditions via the open meteo API."""
