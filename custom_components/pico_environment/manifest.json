@@ -1,6 +1,6 @@
 {
     "codeowners": ["@sjefferson99"],
-    "config_flow": false,
+    "config_flow": true,
     "dependencies": [],
     "documentation": "https://github.com/sjefferson99/pico-environment-ha.git",
     "integration_type": "hub",
